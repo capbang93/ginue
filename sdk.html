@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스도쿠 게임</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .sudoku-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            max-width: 90vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: min(90vw, 90vh);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .title {
+            font-size: 6vw;
+            font-weight: 700;
+            color: #1f2937;
+        }
+        .timer {
+            font-size: 4vw;
+            font-weight: 700;
+            color: #4b5563;
+        }
+        .message-box-inline {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 700;
+            color: #065f46;
+            background-color: #d1fae5;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .message-box-inline.show {
+            opacity: 1;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 1px;
+            background-color: #6b7280;
+            border: 3px solid #6b7280;
+            border-radius: 0.5rem;
+            width: min(90vw, 90vh);
+            height: min(90vw, 90vh);
+            margin: 0 auto;
+        }
+        .cell {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background-color: #e5e7eb;
+            font-size: 3.5vw;
+            font-weight: 700;
+            color: #1f2937;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            outline: none;
+            box-sizing: border-box;
+        }
+        .cell.initial {
+            background-color: #d1d5db;
+            color: #4b5563;
+            cursor: default;
+        }
+        .cell.error {
+            background-color: #fecaca;
+        }
+        .cell.highlight {
+            background-color: #bfdbfe;
+        }
+        .cell.selected {
+            background-color: #dbeafe;
+            border: 2px solid #3b82f6;
+        }
+        .cell:nth-child(3n) {
+            border-right: 3px solid #6b7280;
+        }
+        .cell:nth-child(9n) {
+            border-right: none;
+        }
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 3px solid #6b7280;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            width: 100%;
+            max-width: min(90vw, 90vh);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .btn-new {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-new:hover {
+            background-color: #2563eb;
+        }
+        .btn-check {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-check:hover {
+            background-color: #059669;
+        }
+        .btn-show {
+            background-color: #f59e0b;
+            color: white;
+        }
+        .btn-show:hover {
+            background-color: #d97706;
+        }
+        .message-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 700;
+            transition: opacity 0.3s;
+            opacity: 0;
+            width: 100%;
+            max-width: min(90vw, 90vh);
+        }
+        .message-box.show {
+            opacity: 1;
+        }
+        .message-box.success {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .message-box.error {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .message-box.permanent {
+            opacity: 1;
+        }
+        .number-pad {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            width: 100%;
+            max-width: min(90vw, 90vh);
+            flex-wrap: wrap;
+        }
+        .number-pad button {
+            background-color: #d1d5db;
+            color: #1f2937;
+            font-size: 5vw;
+            flex: 1 1 calc(10% - 0.5rem);
+            max-width: calc(10% - 0.5rem);
+            aspect-ratio: 1;
+            padding: 0;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .number-pad button:hover {
+            background-color: #9ca3af;
+        }
+        .number-pad button.clear {
+            font-size: 3vw;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="sudoku-container">
+        <div class="title-container">
+            <h1 class="title">스도쿠</h1>
+            <span id="timer" class="timer">00:00</span>
+            <div id="inline-message" class="message-box-inline">다 풀었습니다!</div>
+        </div>
+        <div id="board" class="board"></div>
+        <div id="number-pad" class="number-pad">
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="clear">지우기</button>
+        </div>
+        <div class="controls">
+            <button id="new-game-btn" class="btn btn-new">새 게임</button>
+            <button id="check-btn" class="btn btn-check">정답 확인</button>
+            <button id="show-answer-btn" class="btn btn-show">정답 보기</button>
+        </div>
+        <div id="message-box" class="message-box"></div>
+    </div>
+
+    <script>
+        const boardEl = document.getElementById('board');
+        const newGameBtn = document.getElementById('new-game-btn');
+        const checkBtn = document.getElementById('check-btn');
+        const showAnswerBtn = document.getElementById('show-answer-btn');
+        const messageBox = document.getElementById('message-box');
+        const numberPad = document.getElementById('number-pad');
+        const timerEl = document.getElementById('timer');
+        const inlineMessage = document.getElementById('inline-message');
+
+        let initialBoard = [];
+        let solutionBoard = [];
+        let selectedCell = null;
+        let timerInterval;
+        let startTime;
+        let isGameCompleted = false;
+
+        // 퍼즐 생성 함수
+        function generateSudoku() {
+            const board = Array.from({ length: 9 }, () => Array(9).fill(0));
+            solveSudoku(board);
+            const solution = JSON.parse(JSON.stringify(board));
+
+            // 초급 난이도를 위해 30~35개 칸을 비웁니다.
+            const cellsToRemove = Math.floor(Math.random() * 6) + 30; 
+            let removedCount = 0;
+            while (removedCount < cellsToRemove) {
+                const row = Math.floor(Math.random() * 9);
+                const col = Math.floor(Math.random() * 9);
+                if (board[row][col] !== 0) {
+                    const temp = board[row][col];
+                    board[row][col] = 0;
+                    const tempBoard = JSON.parse(JSON.stringify(board));
+                    if (!hasUniqueSolution(tempBoard)) {
+                        board[row][col] = temp;
+                    } else {
+                        removedCount++;
+                    }
+                }
+            }
+            return { puzzle: board, solution: solution };
+        }
+
+        // 스도쿠 풀이 백트래킹 알고리즘
+        function solveSudoku(board) {
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 9; col++) {
+                    if (board[row][col] === 0) {
+                        const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - 0.5);
+                        for (let num of numbers) {
+                            if (isValid(board, row, col, num)) {
+                                board[row][col] = num;
+                                if (solveSudoku(board)) {
+                                    return true;
+                                }
+                                board[row][col] = 0;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        
+        // 유일한 해가 존재하는지 확인
+        function hasUniqueSolution(board) {
+            let solutionsFound = 0;
+            const tempBoard = JSON.parse(JSON.stringify(board));
+
+            function findSolution(tempBoard) {
+                if (solutionsFound > 1) return;
+                for (let row = 0; row < 9; row++) {
+                    for (let col = 0; col < 9; col++) {
+                        if (tempBoard[row][col] === 0) {
+                            for (let num = 1; num <= 9; num++) {
+                                if (isValid(tempBoard, row, col, num)) {
+                                    tempBoard[row][col] = num;
+                                    findSolution(tempBoard);
+                                    tempBoard[row][col] = 0;
+                                }
+                            }
+                            return;
+                        }
+                    }
+                }
+                solutionsFound++;
+            }
+            findSolution(tempBoard);
+            return solutionsFound === 1;
+        }
+
+        // 유효성 검사
+        function isValid(board, row, col, num) {
+            for (let i = 0; i < 9; i++) {
+                if (board[row][i] === num || board[i][col] === num) {
+                    return false;
+                }
+            }
+            const boxStartRow = Math.floor(row / 3) * 3;
+            const boxStartCol = Math.floor(col / 3) * 3;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    if (board[boxStartRow + i][boxStartCol + j] === num) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // 메시지 박스 표시 (일반)
+        function showMessage(msg, type) {
+            messageBox.textContent = msg;
+            messageBox.className = `message-box show ${type}`;
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // 보드 렌더링
+        function renderBoard(board) {
+            boardEl.innerHTML = '';
+            selectedCell = null;
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    if (initialBoard[i][j] !== 0) {
+                        cell.classList.add('initial');
+                        cell.textContent = initialBoard[i][j];
+                    } else {
+                        cell.textContent = initialBoard[i][j] === 0 ? '' : initialBoard[i][j];
+                        cell.addEventListener('click', () => selectCell(cell));
+                    }
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+        
+        // 셀 선택
+        function selectCell(cell) {
+            if (isGameCompleted) return;
+            if (selectedCell) {
+                selectedCell.classList.remove('selected');
+            }
+            selectedCell = cell;
+            selectedCell.classList.add('selected');
+        }
+
+        // 숫자 패드 입력 처리
+        function enterNumber(num) {
+            if (isGameCompleted) return;
+            if (!selectedCell || selectedCell.classList.contains('initial')) {
+                showMessage("숫자를 입력할 수 없는 칸입니다.", "error");
+                return;
+            }
+            const row = parseInt(selectedCell.dataset.row);
+            const col = parseInt(selectedCell.dataset.col);
+            
+            initialBoard[row][col] = num;
+            selectedCell.textContent = num === 0 ? '' : num;
+
+            if (num !== 0) {
+                // 유효성 검사
+                if (checkCell(row, col, num)) {
+                    selectedCell.classList.remove('error');
+                } else {
+                    selectedCell.classList.add('error');
+                }
+            } else {
+                selectedCell.classList.remove('error');
+            }
+            
+            // 모든 칸이 채워졌는지 확인하고, 완료되면 정답 확인
+            let isBoardFull = true;
+            for(let r=0; r<9; r++) {
+                for(let c=0; c<9; c++) {
+                    if(initialBoard[r][c] === 0) {
+                        isBoardFull = false;
+                        break;
+                    }
+                }
+                if (!isBoardFull) break;
+            }
+
+            if (isBoardFull) {
+                checkSolution();
+            }
+        }
+
+        // 숫자 패드 이벤트 리스너
+        numberPad.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const buttonText = e.target.textContent;
+                if (buttonText === '지우기') {
+                    enterNumber(0);
+                } else {
+                    const num = parseInt(buttonText);
+                    enterNumber(num);
+                }
+            }
+        });
+
+        // 실시간 셀 유효성 검사
+        function checkCell(row, col, num) {
+            for (let i = 0; i < 9; i++) {
+                if (initialBoard[row][i] === num && i !== col) {
+                    return false;
+                }
+            }
+            for (let i = 0; i < 9; i++) {
+                if (initialBoard[i][col] === num && i !== row) {
+                    return false;
+                }
+            }
+            const boxStartRow = Math.floor(row / 3) * 3;
+            const boxStartCol = Math.floor(col / 3) * 3;
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    const r = boxStartRow + i;
+                    const c = boxStartCol + j;
+                    if (initialBoard[r][c] === num && (r !== row || c !== col)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // 타이머 시작
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                const elapsedTime = Date.now() - startTime;
+                const minutes = Math.floor(elapsedTime / 60000);
+                const seconds = Math.floor((elapsedTime % 60000) / 1000);
+                timerEl.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // 타이머 정지
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // 새 게임 시작
+        function newGame() {
+            stopTimer();
+            isGameCompleted = false;
+            inlineMessage.classList.remove('show');
+            const { puzzle, solution } = generateSudoku();
+            initialBoard = JSON.parse(JSON.stringify(puzzle));
+            solutionBoard = solution;
+            renderBoard(initialBoard);
+            messageBox.className = 'message-box';
+            startTimer();
+        }
+
+        // 정답 확인 버튼 클릭
+        function checkSolution() {
+            let isCorrect = true;
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    const value = initialBoard[i][j];
+                    const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                    if (value === 0 || value !== solutionBoard[i][j]) {
+                        isCorrect = false;
+                        if (value !== solutionBoard[i][j]) {
+                            cell.classList.add('error');
+                        } else {
+                            cell.classList.remove('error');
+                        }
+                    }
+                }
+            }
+            if (isCorrect) {
+                stopTimer();
+                isGameCompleted = true;
+                inlineMessage.textContent = `다 풀었습니다! (${timerEl.textContent})`;
+                inlineMessage.classList.add('show');
+                showMessage("축하해요! 정답입니다!", "success");
+            } else {
+                showMessage("오류가 있어요. 다시 확인해 보세요.", "error");
+            }
+        }
+
+        // 정답 보기 버튼 클릭
+        function showAnswer() {
+            stopTimer();
+            isGameCompleted = true;
+            inlineMessage.textContent = "정답을 보여드렸습니다.";
+            inlineMessage.classList.add('show');
+            for (let i = 0; i < 9; i++) {
+                for (let j = 0; j < 9; j++) {
+                    const cell = document.querySelector(`[data-row="${i}"][data-col="${j}"]`);
+                    cell.textContent = solutionBoard[i][j];
+                    initialBoard[i][j] = solutionBoard[i][j];
+                    cell.classList.remove('error');
+                }
+            }
+        }
+
+        // 이벤트 리스너
+        newGameBtn.addEventListener('click', newGame);
+        checkBtn.addEventListener('click', checkSolution);
+        showAnswerBtn.addEventListener('click', showAnswer);
+
+        // 초기화
+        window.onload = newGame;
+    </script>
+
+</body>
+</html>
