@@ -1,0 +1,12 @@
+  // sum.js  저장
+  var n_sum = function() {
+        var n = prompt("1 ~ 100 사이의 정수를 입력하세요", "10");
+        s = sum(n);
+        document.write("1부터"+n+"까지의 합은 "+s+"이다");
+   }
+   function sum(num) {
+        var res=0;
+   document.write("<b>1부터 "+num+"까지의 정수의 합을 계산합니다.</b><br/>");
+        for(i=1;i<=num;i++) res += i;
+        return res;
+   }
