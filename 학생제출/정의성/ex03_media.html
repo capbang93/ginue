@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="UTF-8"><title>미디어</title>
+<style>
+  :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans KR', sans-serif; }
+  body { max-width: 960px; margin: 32px auto; padding: 0 16px; line-height: 1.6; }
+  header { display:flex; align-items:center; gap:16px; }
+  header img { width:64px; height:64px; border-radius:50%; object-fit:cover; }
+  h1 { margin: 0.2rem 0 0.6rem; }
+  .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); margin: 12px 0; }
+  .pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#eef2ff; border:1px solid #c7d2fe; margin:3px 4px 0 0; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #d1d5db; padding: 8px; text-align: center; }
+  thead th { background: #f9fafb; }
+  label { display:block; margin-top:10px; }
+  input[type="text"], input[type="email"], textarea { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:10px; }
+  input[type="submit"] { padding:10px 14px; border-radius:12px; border:1px solid #d1d5db; cursor:pointer; }
+</style>
+</head>
+<body>
+<header>
+  <img src="https://picsum.photos/id/1012/100/100" alt="프로필">
+  <div><h1>나를 보여주는 미디어</h1></div>
+</header>
+
+<nav style="display:flex; gap:12px; flex-wrap:wrap; padding:8px; background:#f5f5f5; border-radius:12px; margin:12px 0;">
+  <a href="ex01_profile.html">소개</a>
+  <a href="ex02_layout.html">레이아웃</a>
+  <a href="ex03_media.html">미디어</a>
+  <a href="ex04_table_resume.html">표/이력</a>
+  <a href="ex05_contact.html">연락하기</a>
+</nav>
+
+<section class="card">
+  <h2>오디오</h2>
+  <audio controls>
+    <source src="sample_audio.mp3" type="audio/mpeg">
+    브라우저가 오디오를 지원하지 않습니다.
+  </audio>
+</section>
+<section class="card">
+  <h2>비디오</h2>
+  <video src="sample_video.mp4" controls width="400"></video>
+</section>
+<footer>© 2025 정의성</footer>
+</body>
+</html>

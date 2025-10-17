@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>나만의 소개 페이지 — 레이아웃</title>
+
+<style>
+  :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Apple SD Gothic Neo, 'Noto Sans KR', sans-serif; }
+  body { max-width: 980px; margin: 32px auto; padding: 0 16px; line-height: 1.6; }
+  header { display:flex; align-items:center; gap:16px; }
+  header img { width:64px; height:64px; border-radius:50%; object-fit:cover; }
+  h1 { margin: 0.2rem 0 0.6rem; }
+  .card { border:1px solid #e5e7eb; border-radius:16px; padding:16px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); margin: 12px 0; }
+  .hint { font-size: 0.92rem; color:#374151; background:#f0f9ff; border:1px dashed #93c5fd; padding:10px 12px; border-radius:12px; }
+  footer { margin: 40px 0 20px; font-size: 0.9rem; color: #6b7280; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border: 1px solid #d1d5db; padding: 8px; text-align: center; }
+  thead th { background: #f9fafb; }
+  label { display:block; margin-top:10px; }
+  input[type="text"], input[type="email"], textarea { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:10px; }
+  button, input[type="submit"] { padding:10px 14px; border-radius:12px; border:1px solid #d1d5db; cursor:pointer; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .pill { display:inline-block; padding:4px 10px; border-radius:999px; background:#eef2ff; border:1px solid #c7d2fe; margin:3px 4px 0 0; }
+</style>
+
+</head>
+<body>
+<header>
+  <img src="https://picsum.photos/100" alt="프로필">
+  <div>
+    <h1>레이아웃 실습: div와 span</h1>
+    <p>문단을 나눌 때는 <code>&lt;div&gt;</code>, 문장 속 강조는 <code>&lt;span&gt;</code>!</p>
+  </div>
+</header>
+
+
+<nav style="display:flex; gap:12px; flex-wrap:wrap; padding:8px; background:#f5f5f5; border-radius:12px; margin:12px 0;">
+  <a href="01_profile.html">소개</a>
+  <a href="02_layout.html">레이아웃</a>
+  <a href="03_media.html">미디어</a>
+  <a href="04_table_resume.html">표/이력</a>
+  <a href="05_contact.html">연락하기</a>
+</nav>
+
+
+<section class="card">
+  <h2>나의 취미는 무엇일까?</h2>
+  <div class="grid">
+    <div>
+      <div class="hint">div: 한 줄 공간(블록)</div>
+      <div class="card">책읽기</div>
+      <div class="card">코딩 관련한것들 찾아보기</div>
+    </div>
+    <div>
+      <div class="hint">div: 줄바꿈 O</div>
+      <div class="card">나무위키 찾아보기</div>
+      <div class="card">수학이나 영어 숙제하기</div>
+    </div>
+    <div>
+      <p>문장 속 <span style="background: #fffbcc;">중요한 단어</span>를 강조할 때는 span!</p>
+      <p>줄바꿈 없이 <span style="background:#d1fae5;">연결</span>됩니다.</p>
+    </div>
+  </div>
+  <p class="hint">참고: div는 한 줄을 차지하고 앞뒤 줄바꿈이 자동으로 발생, span은 내용만큼만 차지하며 줄바꿈이 없습니다.</p>
+</section>
+
+<section class="card">
+  <h2>나의 하루는 무엇일까?</h2>
+  <div class="grid">
+    <div class="card" contenteditable="true">아침먹고 등교하기</div>
+    <div class="card" contenteditable="true">친구들이랑 놀거나 수업듣기</div>
+    <div class="card" contenteditable="true">숙제하거나 학원가기</div>
+  </div>
+</section>
+
+<footer>© 2025 나만의 소개 사이트 템플릿</footer>
+</body>
+</html>
