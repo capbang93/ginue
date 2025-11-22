@@ -1,0 +1,21 @@
+int redPin = 13;
+int greenPin = 12;
+
+void setup() {
+  pinMode(redPin, OUTPUT);
+  pinMode(greenPin, OUTPUT);
+  Serial.begin(9600);
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char rc = Serial.read();
+    if (rc == '1') {
+      digitalWrite(greenPin, HIGH);
+      digitalWrite(redPin, LOW);
+    } else if (rc == '0') {
+      digitalWrite(greenPin, LOW);
+      digitalWrite(redPin, HIGH);
+    }
+  }
+}
