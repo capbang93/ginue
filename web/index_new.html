@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition with Arduino</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+        
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .start-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+        
+        .start-button-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        #startBtn, #stopBtn {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        #startBtn {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        #startBtn:hover:not(:disabled) {
+            background: #45a049;
+        }
+        
+        #startBtn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #stopBtn {
+            background: #f44336;
+            color: white;
+        }
+        
+        #stopBtn:hover:not(:disabled) {
+            background: #da190b;
+        }
+        
+        #stopBtn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .countdown-display {
+            font-size: 8rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            min-height: 120px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .countdown-display.show {
+            display: flex;
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .class-button-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        
+        .class-button {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px 50px;
+            font-size: 2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .class-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .class-button:not(:disabled):hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+        
+        #class1Btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        #class2Btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .webcam-wrapper {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        #webcam-container {
+            border: 3px solid white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        #label-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            padding: 10px;
+            min-width: 200px;
+        }
+        
+        #label-container div {
+            color: white;
+            font-size: 0.9rem;
+            padding: 5px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* 프로필 모달 스타일 */
+        #profileModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content-wrapper {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f3f4f6;
+            border-bottom: 1px solid #d1d5db;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+        
+        .close-btn:hover {
+            background: #dc2626;
+        }
+        
+        #profileIframe {
+            width: 100%;
+            height: calc(90vh - 70px);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Face Recognition with Arduino</h1>
+    
+    <div class="start-section">
+        <div class="start-button-container">
+            <button id="startBtn" type="button" onclick="init()">Start</button>
+            <button id="stopBtn" type="button" onclick="forceStop()" disabled>Stop</button>
+        </div>
+        <div class="countdown-display" id="countdownDisplay"></div>
+    </div>
+    
+    <div class="button-container">
+        <div class="class-button-wrapper">
+            <button id="class1Btn" class="class-button" disabled onclick="openProfileModal('Class1/profile.html')">Class 1</button>
+        </div>
+        
+        <div class="class-button-wrapper">
+            <button id="class2Btn" class="class-button" disabled onclick="openProfileModal('Class2/profile.html')">Class 2</button>
+        </div>
+    </div>
+    
+    <div class="webcam-wrapper">
+        <div id="webcam-container"></div>
+        <div id="label-container"></div>
+    </div>
+    
+    <!-- 프로필 모달 -->
+    <div id="profileModal">
+        <div class="modal-content-wrapper">
+            <div class="modal-header">
+                <h2>프로필 정보</h2>
+                <button class="close-btn" onclick="closeProfileModal()">닫기</button>
+            </div>
+            <iframe id="profileIframe" src=""></iframe>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script src="sketch.js"></script>
+</body>
+</html>
